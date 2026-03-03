@@ -24,3 +24,4 @@
 - **Localize spreadsheet by running sample code for error and Boolean value localization using a workbook loaded in XLSX format.** → `Localize_spreadsheet_by_running_sample_code_for_error_and_Bo.cs`
 - **Localize spreadsheet by implementing subtotal and grand total label localization in other languages using a workbook loaded in XLSX format.** → `Localize_spreadsheet_by_implementing_subtotal_and_grand_tota.cs`
 - **Localize spreadsheet by exploring possible usage scenarios for subtotal and grand total label localization using a workbook loaded in XLSX format.** → `Localize_spreadsheet_by_exploring_possible_usage_scenarios_f.cs`
+- **Localize spreadsheet by running sample code for subtotal and grand total label localization using a workbook loaded in XLSX format.** → `Localize_spreadsheet_by_running_sample_code_for_subtotal_and.cs`
