@@ -6,13 +6,13 @@ namespace AsposeCellsLocalizationDemo
     // Custom globalization settings for Russian language
     public class RussianGlobalizationSettings : GlobalizationSettings
     {
-        // Localize Boolean values
-        public override string GetBooleanValueString(bool value)
+        // Localize boolean values: TRUE -> ИСТИНА, FALSE -> ЛОЖЬ
+        public override string GetBooleanValueString(bool bv)
         {
-            return value ? "ИСТИНА" : "ЛОЖЬ";
+            return bv ? "ИСТИНА" : "ЛОЖЬ";
         }
 
-        // Localize error values
+        // Localize common Excel error values
         public override string GetErrorValueString(string err)
         {
             switch (err)
@@ -34,38 +34,32 @@ namespace AsposeCellsLocalizationDemo
         static void Main()
         {
             // Path to the source XLSX file
-            string inputFile = "input.xlsx";
+            string inputPath = "input.xlsx";
 
             // Load the workbook (XLSX format)
-            Workbook workbook = new Workbook(inputFile);
+            Workbook workbook = new Workbook(inputPath);
 
             // Apply the custom Russian globalization settings
             workbook.Settings.GlobalizationSettings = new RussianGlobalizationSettings();
 
-            // Example: write some test data to demonstrate localization
-            Cells cells = workbook.Worksheets[0].Cells;
-            cells[0, 0].PutValue(true);   // Boolean TRUE
-            cells[0, 1].PutValue(false);  // Boolean FALSE
+            // Example: write some boolean and error values to demonstrate localization
+            Worksheet sheet = workbook.Worksheets[0];
+            Cells cells = sheet.Cells;
 
-            string[] errors = new string[]
-            {
-                "#NAME?", "#DIV/0!", "#REF!", "#VALUE!", "#N/A", "#NUM!", "#NULL!"
-            };
+            // Boolean values
+            cells[0, 0].PutValue(true);   // Will display "ИСТИНА"
+            cells[0, 1].PutValue(false);  // Will display "ЛОЖЬ"
 
+            // Error values
+            string[] errors = new string[] { "#NAME?", "#DIV/0!", "#REF!", "#VALUE!", "#N/A", "#NUM!", "#NULL!" };
             for (int i = 0; i < errors.Length; i++)
             {
-                cells[0, i + 2].PutValue(errors[i]); // Insert error strings
-            }
-
-            // Display localized values in the console
-            for (int i = 0; i < 9; i++)
-            {
-                Console.WriteLine($"Cell[0,{i}]: {cells[0, i].StringValue}");
+                cells[0, i + 2].PutValue(errors[i]); // Will be shown in Russian equivalents
             }
 
             // Save the localized workbook
-            string outputFile = "output.xlsx";
-            workbook.Save(outputFile);
+            string outputPath = "output.xlsx";
+            workbook.Save(outputPath);
         }
     }
 }
