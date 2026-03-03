@@ -3,14 +3,19 @@ using Aspose.Cells;
 
 namespace AsposeCellsExamples
 {
-    public class Program
+    public class ConvertExcelToPdf
     {
         public static void Main()
+        {
+            Run();
+        }
+
+        public static void Run()
         {
             // Path to the source XLSX file
             string sourcePath = "input.xlsx";
 
-            // Path for the output PDF file
+            // Path where the PDF will be saved
             string destPath = "output.pdf";
 
             // Load the workbook and save it as PDF
