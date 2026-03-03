@@ -7,19 +7,17 @@ namespace AsposeCellsFormulaLocalDemo
     {
         static void Main(string[] args)
         {
-            // Path to the source XLSX workbook
-            string inputPath = "input.xlsx";
+            // Path to the source XLSX file (replace with actual path)
+            string inputPath = "sample.xlsx";
 
             // Load the workbook (XLSX format)
             Workbook workbook = new Workbook(inputPath);
 
-            // Set the workbook's default locale to German (Germany)
+            // Set the workbook's default locale to German (for demonstration)
             workbook.Settings.Region = CountryCode.Germany;
 
-            // Get the first worksheet
+            // Access the first worksheet and cell A1
             Worksheet worksheet = workbook.Worksheets[0];
-
-            // Access cell A1
             Cell cell = worksheet.Cells["A1"];
 
             // Set a formula using the standard (English) notation
@@ -29,10 +27,10 @@ namespace AsposeCellsFormulaLocalDemo
             Console.WriteLine("Standard Formula: " + cell.Formula);
             Console.WriteLine("Localized Formula: " + cell.FormulaLocal);
 
-            // Set a formula using the German localized notation
+            // Set the formula using the German localized notation
             cell.FormulaLocal = "=SUMME(B1:C1)";
 
-            // Display the formulas again to show the difference
+            // Display the formulas again to show the change
             Console.WriteLine("\nAfter setting FormulaLocal:");
             Console.WriteLine("Standard Formula: " + cell.Formula);
             Console.WriteLine("Localized Formula: " + cell.FormulaLocal);
@@ -45,6 +43,7 @@ namespace AsposeCellsFormulaLocalDemo
             // Save the modified workbook
             string outputPath = "output.xlsx";
             workbook.Save(outputPath);
+            Console.WriteLine($"\nWorkbook saved to '{outputPath}'.");
         }
     }
 }
