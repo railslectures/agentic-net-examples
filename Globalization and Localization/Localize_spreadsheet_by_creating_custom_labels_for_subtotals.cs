@@ -1,46 +1,68 @@
 using System;
 using Aspose.Cells;
 
-public class CustomGlobalizationSettings : GlobalizationSettings
+namespace AsposeCellsGlobalizationDemo
 {
-    // Override the total name for specific consolidation functions
-    public override string GetTotalName(ConsolidationFunction functionType)
+    // Custom globalization settings to provide custom subtotal labels
+    public class CustomGlobalizationSettings : GlobalizationSettings
     {
-        switch (functionType)
+        // Override GetTotalName to return a custom label for each consolidation function
+        public override string GetTotalName(ConsolidationFunction functionType)
         {
-            case ConsolidationFunction.Sum:
-                return "Subtotal Sum";
-            case ConsolidationFunction.Count:
-                return "Subtotal Count";
-            case ConsolidationFunction.Average:
-                return "Subtotal Average";
-            default:
-                return base.GetTotalName(functionType);
+            switch (functionType)
+            {
+                case ConsolidationFunction.Sum:
+                    return "Custom Sum Total";
+                case ConsolidationFunction.Average:
+                    return "Custom Average Total";
+                case ConsolidationFunction.Count:
+                    return "Custom Count Total";
+                case ConsolidationFunction.Max:
+                    return "Custom Max Total";
+                case ConsolidationFunction.Min:
+                    return "Custom Min Total";
+                default:
+                    // Fallback to the base implementation for any other functions
+                    return base.GetTotalName(functionType);
+            }
         }
     }
-}
 
-public class Program
-{
-    public static void Main()
+    class Program
     {
-        // Load the existing XLSX workbook
-        Workbook workbook = new Workbook("input.xlsx");
+        static void Main(string[] args)
+        {
+            // Load an existing XLSX workbook (replace with your actual file path)
+            Workbook workbook = new Workbook("input.xlsx");
 
-        // Assign custom globalization settings to the workbook
-        workbook.Settings.GlobalizationSettings = new CustomGlobalizationSettings();
+            // Get the first worksheet (you can adjust the index as needed)
+            Worksheet worksheet = workbook.Worksheets[0];
+            Cells cells = worksheet.Cells;
 
-        // Define the cell area on which to apply subtotals (e.g., A1:B5)
-        CellArea area = CellArea.CreateCellArea(0, 0, 4, 1); // rows 0‑4, columns 0‑1
+            // Apply the custom globalization settings to the workbook
+            workbook.Settings.GlobalizationSettings = new CustomGlobalizationSettings();
 
-        // Apply subtotal:
-        //   - Group by column 0 (first column)
-        //   - Use SUM as the consolidation function
-        //   - Add subtotal for column 1 (second column)
-        //   - Replace existing subtotals, no page break, place summary below
-        workbook.Worksheets[0].Cells.Subtotal(area, 0, ConsolidationFunction.Sum, new int[] { 1 }, true, false, true);
+            // Define the range on which to apply subtotals.
+            // Here we use the used range of columns A and B (0‑based indexes).
+            int firstRow = cells.MinRow;
+            int firstColumn = cells.MinColumn;
+            int lastRow = cells.MaxDataRow;
+            int lastColumn = cells.MaxDataColumn;
 
-        // Save the modified workbook
-        workbook.Save("output.xlsx");
+            // Create a CellArea covering the used range
+            CellArea area = CellArea.CreateCellArea(firstRow, firstColumn, lastRow, lastColumn);
+
+            // Apply subtotal:
+            // - group by column 0 (first column)
+            // - use Sum function for the subtotal
+            // - include column 0 in the subtotal calculation (new int[] { 0 })
+            // - replace existing subtotals: true
+            // - use outline style: false
+            // - page break after each subtotal: true
+            cells.Subtotal(area, 0, ConsolidationFunction.Sum, new int[] { 0 }, true, false, true);
+
+            // Save the modified workbook (replace with your desired output path)
+            workbook.Save("output.xlsx");
+        }
     }
 }
