@@ -1,31 +1,23 @@
 using System;
 using Aspose.Cells;
+using Aspose.Cells.Charts;
 
-namespace AsposeCellsLocalizationDemo
+namespace AsposeCellsGlobalizationDemo
 {
-    // Custom globalization settings to localize Boolean and error values.
     public class CustomGlobalizationSettings : GlobalizationSettings
     {
-        // Localize Boolean values (e.g., Russian).
-        public override string GetBooleanValueString(bool bv)
+        public CustomGlobalizationSettings()
         {
-            return bv ? "ИСТИНА" : "ЛОЖЬ";
+            var chartSettings = new SettableChartGlobalizationSettings();
+            chartSettings.SetOtherName("Otros");
+            this.ChartSettings = chartSettings;
         }
 
-        // Localize common Excel error strings.
-        public override string GetErrorValueString(string err)
+        public override string GetTotalName(ConsolidationFunction functionType)
         {
-            switch (err)
-            {
-                case "#NAME?": return "#ИМЯ?";
-                case "#DIV/0!": return "#ДЕЛ/0!";
-                case "#REF!": return "#ССЫЛКА!";
-                case "#VALUE!": return "#ЗНАЧ!";
-                case "#N/A": return "#Н/Д";
-                case "#NUM!": return "#ЧИСЛО!";
-                case "#NULL!": return "#ПУСТО!";
-                default: return base.GetErrorValueString(err);
-            }
+            if (functionType == ConsolidationFunction.Sum)
+                return "Custom Sum Total";
+            return base.GetTotalName(functionType);
         }
     }
 
@@ -33,42 +25,28 @@ namespace AsposeCellsLocalizationDemo
     {
         static void Main()
         {
-            // Load an existing XLSX workbook.
-            // Replace "input.xlsx" with the path to your source file.
-            Workbook wb = new Workbook("input.xlsx");
-
-            // Apply the custom globalization settings to the workbook.
-            wb.Settings.GlobalizationSettings = new CustomGlobalizationSettings();
-
-            // Access the first worksheet.
-            Worksheet sheet = wb.Worksheets[0];
+            Workbook workbook = new Workbook("input.xlsx");
+            Worksheet sheet = workbook.Worksheets[0];
             Cells cells = sheet.Cells;
 
-            // Populate sample data if the workbook is empty.
-            // Boolean values.
-            cells[0, 0].PutValue(true);
-            cells[0, 1].PutValue(false);
+            workbook.Settings.GlobalizationSettings = new CustomGlobalizationSettings();
 
-            // Common error strings.
-            string[] errors = new string[]
+            CellArea dataArea = CellArea.CreateCellArea(0, 0, 4, 1); // A1:B5
+            cells.Subtotal(dataArea, 0, ConsolidationFunction.Sum, new int[] { 1 }, true, false, true);
+
+            int chartIndex = sheet.Charts.Add(ChartType.Pie, 6, 0, 20, 10);
+            Chart pieChart = sheet.Charts[chartIndex];
+
+            pieChart.NSeries.Add("B1:B5", true);
+            pieChart.NSeries.CategoryData = "A1:A5";
+
+            // Show data labels for the first series to display the custom "Other" label.
+            if (pieChart.NSeries.Count > 0)
             {
-                "#NAME?", "#DIV/0!", "#REF!", "#VALUE!", "#N/A", "#NUM!", "#NULL!"
-            };
-            for (int i = 0; i < errors.Length; i++)
-            {
-                cells[0, i + 2].PutValue(errors[i]);
+                pieChart.NSeries[0].DataLabels.ShowValue = true;
             }
 
-            // Display localized string values in the console.
-            Console.WriteLine("Localized cell values:");
-            for (int col = 0; col < 9; col++)
-            {
-                Console.WriteLine($"Cell[0,{col}]: {cells[0, col].StringValue}");
-            }
-
-            // Save the localized workbook.
-            // The output file will contain the localized Boolean and error strings.
-            wb.Save("localized_output.xlsx");
+            workbook.Save("output.xlsx");
         }
     }
 }
