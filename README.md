@@ -1,12 +1,10 @@
-# Aspose.Cells for .NET – Agentic Examples
+# Aspose.Cells for .NET — Agentic Code Examples
 
-This repository contains automatically generated and validated examples
-for Aspose.Cells for .NET.
+Auto-generated validated examples.
 
-Examples are:
-- Generated via Examples Super Agent
-- Built and executed using .NET
-- Automatically validated before publishing
-- Organized category-wise
+## Categories
 
-Last Updated: 2026-03-04
+- [Comments and Notes](./Comments and Notes)
+- [Conversion](./Conversion)
+- [Globalization and Localization](./Globalization and Localization)
+- [Save Workbook](./Save Workbook)
