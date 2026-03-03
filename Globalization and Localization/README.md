@@ -28,3 +28,4 @@
 - **Localize spreadsheet by using GlobalizationSettings class to customize subtotal labels and other label of pie chart using a workbook loaded in XLSX format.** → `Localize_spreadsheet_by_using_GlobalizationSettings_class_to.cs`
 - **Localize spreadsheet by exploring possible usage scenarios for GlobalizationSettings customization of subtotal and pie chart other labels using a workbook loaded in XLSX format.** → `Localize_spreadsheet_by_exploring_possible_usage_scenarios_f.cs`
 - **Localize spreadsheet by reviewing introduction to GlobalizationSettings class for localization purposes using a workbook loaded in XLSX format.** → `Localize_spreadsheet_by_reviewing_introduction_to_Globalizat.cs`
+- **Localize spreadsheet by creating custom labels for subtotals using GlobalizationSettings with a workbook loaded in XLSX format.** → `Localize_spreadsheet_by_creating_custom_labels_for_subtotals.cs`
