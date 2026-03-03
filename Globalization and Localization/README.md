@@ -14,3 +14,4 @@
 - Localize spreadsheet by exploring possible usage scenarios for GlobalizationSettings customization of subtotal and pie chart other labels using a workbook loaded in XLSX format.
 - Localize spreadsheet by reviewing introduction to GlobalizationSettings class for localization purposes using a workbook loaded in XLSX format.
 - Localize spreadsheet by creating custom labels for subtotals using GlobalizationSettings with a workbook loaded in XLSX format.
+- Localize spreadsheet by setting custom text for the other label of a pie chart using GlobalizationSettings with a workbook loaded in XLSX format.
