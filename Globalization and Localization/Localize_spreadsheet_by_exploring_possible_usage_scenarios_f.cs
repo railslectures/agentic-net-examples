@@ -1,90 +1,86 @@
 using System;
 using Aspose.Cells;
+using Aspose.Cells.Pivot;
+using Aspose.Cells.Settings;
 
 namespace AsposeCellsLocalizationDemo
 {
-    // Custom globalization settings to localize boolean and error values
-    public class CustomGlobalizationSettings : GlobalizationSettings
-    {
-        // Localize boolean values (e.g., Russian)
-        public override string GetBooleanValueString(bool bv)
-        {
-            return bv ? "ИСТИНА" : "ЛОЖЬ";
-        }
-
-        // Localize common Excel error strings (e.g., Russian equivalents)
-        public override string GetErrorValueString(string err)
-        {
-            switch (err)
-            {
-                case "#NAME?": return "#ИМЯ?";
-                case "#DIV/0!": return "#ДЕЛ/0!";
-                case "#REF!": return "#ССЫЛКА!";
-                case "#VALUE!": return "#ЗНАЧ!";
-                case "#N/A": return "#Н/Д";
-                case "#NUM!": return "#ЧИСЛО!";
-                case "#NULL!": return "#ПУСТО!";
-                default: return base.GetErrorValueString(err);
-            }
-        }
-    }
-
     class Program
     {
         static void Main()
         {
-            // -----------------------------------------------------------------
-            // Step 1: Create a workbook and populate it with boolean values and
-            //         error strings. This workbook will be saved and later loaded.
-            // -----------------------------------------------------------------
-            Workbook wbCreate = new Workbook();
-            Cells cellsCreate = wbCreate.Worksheets[0].Cells;
+            // Load an existing workbook (replace with your actual file path)
+            Workbook workbook = new Workbook("input.xlsx");
+            Worksheet sheet = workbook.Worksheets[0];
+            Cells cells = sheet.Cells;
 
-            // Boolean values
-            cellsCreate[0, 0].PutValue(true);   // A1
-            cellsCreate[0, 1].PutValue(false);  // B1
+            // ------------------------------------------------------------
+            // 1. Globalize subtotal/total labels for regular Subtotal feature
+            // ------------------------------------------------------------
+            // Create a SettableGlobalizationSettings instance to modify built‑in texts
+            SettableGlobalizationSettings globalSettings = new SettableGlobalizationSettings();
 
-            // Error strings (standard English)
-            string[] errors = new string[]
-            {
-                "#NAME?", "#DIV/0!", "#REF!", "#VALUE!", "#N/A", "#NUM!", "#NULL!"
-            };
-            for (int i = 0; i < errors.Length; i++)
-            {
-                cellsCreate[0, i + 2].PutValue(errors[i]); // C1 onward
-            }
+            // Change the label for the grand total of the SUM function
+            globalSettings.SetGrandTotalName(ConsolidationFunction.Sum, "Sum Grand Total (Localized)");
 
-            // Save the initial workbook (XLSX format)
-            string originalPath = "original.xlsx";
-            wbCreate.Save(originalPath);
+            // Change the label for the total (non‑grand) of the SUM function
+            globalSettings.SetTotalName(ConsolidationFunction.Sum, "Sum Total (Localized)");
 
-            // -----------------------------------------------------------------
-            // Step 2: Load the workbook from the saved XLSX file.
-            // -----------------------------------------------------------------
-            Workbook wb = new Workbook(originalPath);
-            Cells cells = wb.Worksheets[0].Cells;
+            // Apply the globalization settings to the workbook
+            workbook.Settings.GlobalizationSettings = globalSettings;
 
-            // -----------------------------------------------------------------
-            // Step 3: Apply custom globalization settings for localization.
-            // -----------------------------------------------------------------
-            wb.Settings.GlobalizationSettings = new CustomGlobalizationSettings();
+            // Add sample data for Subtotal demonstration
+            cells["A1"].PutValue("Category");
+            cells["B1"].PutValue("Amount");
+            cells["A2"].PutValue("North");
+            cells["B2"].PutValue(1200);
+            cells["A3"].PutValue("South");
+            cells["B3"].PutValue(800);
+            cells["A4"].PutValue("East");
+            cells["B4"].PutValue(1500);
+            cells["A5"].PutValue("West");
+            cells["B5"].PutValue(700);
 
-            // -----------------------------------------------------------------
-            // Step 4: Display localized values using StringValue.
-            //         Boolean values and error strings will appear in the
-            //         localized form defined in CustomGlobalizationSettings.
-            // -----------------------------------------------------------------
-            Console.WriteLine("Localized cell values:");
-            for (int col = 0; col < 9; col++)
-            {
-                Console.WriteLine($"Cell[0,{col}] ({cells[0, col].Name}): {cells[0, col].StringValue}");
-            }
+            // Apply Subtotal: group by column 0 (Category) and calculate SUM on column 1 (Amount)
+            // The generated total rows will use the localized labels set above
+            CellArea dataRange = CellArea.CreateCellArea(0, 0, 4, 1);
+            cells.Subtotal(dataRange, 0, ConsolidationFunction.Sum, new int[] { 0 }, true, false, true);
 
-            // -----------------------------------------------------------------
-            // Step 5: Save the workbook with applied localization.
-            // -----------------------------------------------------------------
-            string localizedPath = "localized.xlsx";
-            wb.Save(localizedPath);
+            // ------------------------------------------------------------
+            // 2. Globalize Grand Total and Subtotal labels for PivotTable
+            // ------------------------------------------------------------
+            // Create a SettablePivotGlobalizationSettings instance
+            SettablePivotGlobalizationSettings pivotSettings = new SettablePivotGlobalizationSettings();
+
+            // Localize the "Grand Total" label in the pivot table
+            pivotSettings.SetTextOfGrandTotal("Grand Total (Localized)");
+
+            // Localize the "Subtotal" label for the SUM type
+            pivotSettings.SetTextOfSubTotal(PivotFieldSubtotalType.Sum, "Sum Subtotal (Localized)");
+
+            // Assign the pivot globalization settings to the workbook's globalization settings
+            globalSettings.PivotSettings = pivotSettings;
+
+            // Build a simple pivot table to demonstrate the localized labels
+            // (The same worksheet is used; pivot will be placed starting at D1)
+            int pivotIndex = sheet.PivotTables.Add("A1:B5", "D1", "PivotTable1");
+            PivotTable pivotTable = sheet.PivotTables[pivotIndex];
+
+            // Row field: Category (column 0)
+            pivotTable.AddFieldToArea(PivotFieldType.Row, 0);
+            // Data field: Amount (column 1) with SUM aggregation
+            int dataFieldPos = pivotTable.AddFieldToArea(PivotFieldType.Data, 1);
+            PivotField dataField = pivotTable.DataFields[dataFieldPos];
+            dataField.Function = ConsolidationFunction.Sum;
+
+            // Refresh and calculate the pivot table so that labels appear
+            pivotTable.RefreshData();
+            pivotTable.CalculateData();
+
+            // ------------------------------------------------------------
+            // Save the modified workbook (replace with your desired output path)
+            // ------------------------------------------------------------
+            workbook.Save("output.xlsx");
         }
     }
 }
