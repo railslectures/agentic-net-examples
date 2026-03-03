@@ -16,3 +16,4 @@
 - Localize spreadsheet by creating custom labels for subtotals using GlobalizationSettings with a workbook loaded in XLSX format.
 - Localize spreadsheet by setting custom text for the other label of a pie chart using GlobalizationSettings with a workbook loaded in XLSX format.
 - **Localize spreadsheet by implementing Cell.FormulaLocal similar to Excel VBA Range.FormulaLocal using a workbook loaded in XLSX format.** → `Localize_spreadsheet_by_implementing_Cell.FormulaLocal_simil.cs`
+- **Localize spreadsheet by exploring possible usage scenarios for FormulaLocal localization using a workbook loaded in XLSX format.** → `Localize_spreadsheet_by_exploring_possible_usage_scenarios_f.cs`
