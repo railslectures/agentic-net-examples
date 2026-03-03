@@ -1,57 +1,81 @@
 using System;
 using Aspose.Cells;
 
-class FormulaLocalDemo
+namespace LocalizationDemo
 {
-    static void Main()
+    class Program
     {
-        // Load an existing workbook (replace with actual path)
-        Workbook workbook = new Workbook("input.xlsx");
-
-        // Set the workbook region to German to demonstrate built‑in localization
-        workbook.Settings.Region = CountryCode.Germany;
-
-        Worksheet worksheet = workbook.Worksheets[0];
-        Cell cell = worksheet.Cells["A1"];
-
-        // 1. Set a formula using the standard (English) syntax
-        cell.Formula = "=SUM(B1:C1)";
-        Console.WriteLine("Standard Formula: " + cell.Formula);
-        Console.WriteLine("Localized Formula (German): " + cell.FormulaLocal);
-
-        // 2. Set a formula using the localized (German) function name
-        cell.FormulaLocal = "=SUMME(B1:C1)";
-        Console.WriteLine("\nAfter assigning FormulaLocal:");
-        Console.WriteLine("Standard Formula: " + cell.Formula);
-        Console.WriteLine("Localized Formula: " + cell.FormulaLocal);
-
-        // 3. Use custom globalization settings to map a standard function to an Italian name
-        var customSettings = new SettableGlobalizationSettings();
-        customSettings.SetLocalFunctionName("SUM", "SOMMA", true); // map SUM ↔ SOMMA
-        workbook.Settings.GlobalizationSettings = customSettings;
-
-        // Populate data for the Italian SUM example
-        worksheet.Cells["B2"].PutValue(1);
-        worksheet.Cells["B3"].PutValue(2);
-        worksheet.Cells["B4"].PutValue(3);
-        worksheet.Cells["B5"].PutValue(4);
-
-        // Apply a formula using the Italian localized name
-        worksheet.Cells["A2"].FormulaLocal = "=SOMMA(B2:B5)";
-        workbook.CalculateFormula();
-        Console.WriteLine("\nResult of Italian SUM (SOMMA) in A2: " + worksheet.Cells["A2"].Value);
-
-        // 4. Use FormulaParseOptions to indicate that the formula string is locale‑formatted
-        var parseOptions = new FormulaParseOptions
+        static void Main()
         {
-            LocaleDependent = true,
-            R1C1Style = false
-        };
-        // Example: French date format inside TEXT function (argument separator is ';' for French)
-        worksheet.Cells["A3"].SetFormula("TEXT(TODAY();\"[$-fr-FR]dddd, dd mmmm yyyy\")", parseOptions);
-        Console.WriteLine("\nLocalized date formula set in A3 (FormulaLocal): " + worksheet.Cells["A3"].FormulaLocal);
+            // Load an existing XLSX workbook
+            string inputPath = "sample.xlsx";
+            Workbook wb = new Workbook(inputPath);
 
-        // Save the modified workbook
-        workbook.Save("output.xlsx");
+            // Apply custom globalization settings for Boolean and error values
+            wb.Settings.GlobalizationSettings = new CustomGlobalizationSettings();
+
+            // Access the first worksheet and its cells
+            Worksheet ws = wb.Worksheets[0];
+            Cells cells = ws.Cells;
+
+            // -------------------------------------------------
+            // Boolean localization example
+            // -------------------------------------------------
+            cells["A1"].PutValue(true);   // Will be displayed as "ИСТИНА"
+            cells["A2"].PutValue(false);  // Will be displayed as "ЛОЖЬ"
+
+            // -------------------------------------------------
+            // Error value localization example
+            // -------------------------------------------------
+            string[] errors = new string[]
+            {
+                "#NAME?", "#DIV/0!", "#REF!", "#VALUE!", "#N/A", "#NUM!", "#NULL!"
+            };
+
+            // Place error strings starting from column C (index 2) in row 1
+            for (int i = 0; i < errors.Length; i++)
+            {
+                cells[0, i + 2].PutValue(errors[i]);
+            }
+
+            // -------------------------------------------------
+            // Display localized values in the console
+            // -------------------------------------------------
+            Console.WriteLine("Localized cell values:");
+            for (int col = 0; col < 9; col++)
+            {
+                Console.WriteLine($"Cell[0,{col}]: {cells[0, col].StringValue}");
+            }
+
+            // Save the workbook to verify that localization is persisted
+            string outputPath = "localized_output.xlsx";
+            wb.Save(outputPath);
+        }
+    }
+
+    // Custom globalization settings overriding Boolean and error string representations
+    public class CustomGlobalizationSettings : GlobalizationSettings
+    {
+        // Localize Boolean values (example: Russian)
+        public override string GetBooleanValueString(bool bv)
+        {
+            return bv ? "ИСТИНА" : "ЛОЖЬ";
+        }
+
+        // Localize standard Excel error strings (example: Russian equivalents)
+        public override string GetErrorValueString(string err)
+        {
+            switch (err)
+            {
+                case "#NAME?":   return "#ИМЯ?";
+                case "#DIV/0!":  return "#ДЕЛ/0!";
+                case "#REF!":    return "#ССЫЛКА!";
+                case "#VALUE!":  return "#ЗНАЧ!";
+                case "#N/A":     return "#Н/Д";
+                case "#NUM!":    return "#ЧИСЛО!";
+                case "#NULL!":   return "#ПУСТО!";
+                default:         return base.GetErrorValueString(err);
+            }
+        }
     }
 }
