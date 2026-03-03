@@ -1,5 +1,5 @@
 using System;
-using Aspose.Cells;
+using Aspose.Cells.Utility;
 
 namespace AsposeCellsConversionDemo
 {
@@ -7,19 +7,16 @@ namespace AsposeCellsConversionDemo
     {
         static void Main()
         {
+            // Path to the source Excel file (XLSX)
             string sourcePath = "input.xlsx";
-            string destPath = "output.xps";
 
-            try
-            {
-                Workbook workbook = new Workbook(sourcePath);
-                workbook.Save(destPath, SaveFormat.Xps);
-                Console.WriteLine($"Conversion successful: '{sourcePath}' -> '{destPath}'");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error during conversion: {ex.Message}");
-            }
+            // Desired output path for the XPS file
+            string outputPath = "output.xps";
+
+            // Convert the Excel workbook to XPS using Aspose.Cells ConversionUtility
+            ConversionUtility.Convert(sourcePath, outputPath);
+
+            Console.WriteLine("Excel file has been successfully converted to XPS.");
         }
     }
 }
