@@ -8,20 +8,9 @@ class LocalizePieChartOtherLabel
     {
         // Load an existing XLSX workbook
         Workbook workbook = new Workbook("input.xlsx");
-
-        // Create chart globalization settings and set custom text for the "Other" label
-        SettableChartGlobalizationSettings chartSettings = new SettableChartGlobalizationSettings();
-        chartSettings.SetOtherName("Custom Other");
-
-        // Create a SettableGlobalizationSettings instance and assign the chart settings
-        SettableGlobalizationSettings globalization = new SettableGlobalizationSettings();
-        globalization.ChartSettings = chartSettings;
-
-        // Apply the globalization settings to the workbook
-        workbook.Settings.GlobalizationSettings = globalization;
-
-        // (Optional) Create a pie chart to demonstrate the effect
         Worksheet sheet = workbook.Worksheets[0];
+
+        // Create a pie chart (optional, for demonstration)
         int chartIndex = sheet.Charts.Add(ChartType.Pie, 5, 0, 15, 5);
         Chart pieChart = sheet.Charts[chartIndex];
         // Sample data for the chart
@@ -31,11 +20,21 @@ class LocalizePieChartOtherLabel
         sheet.Cells["A4"].PutValue("C");
         sheet.Cells["B1"].PutValue("Value");
         sheet.Cells["B2"].PutValue(30);
-        sheet.Cells["B3"].PutValue(20);
-        sheet.Cells["B4"].PutValue(10);
-        // Add data series; the "Other" slice will use the custom label
+        sheet.Cells["B3"].PutValue(45);
+        sheet.Cells["B4"].PutValue(25);
         pieChart.NSeries.Add("B2:B4", true);
         pieChart.NSeries.CategoryData = "A2:A4";
+
+        // Create chart globalization settings and set custom "Other" label
+        SettableChartGlobalizationSettings chartSettings = new SettableChartGlobalizationSettings();
+        chartSettings.SetOtherName("Miscellaneous Items");
+
+        // Create overall globalization settings and assign the chart settings
+        SettableGlobalizationSettings globalSettings = new SettableGlobalizationSettings();
+        globalSettings.ChartSettings = chartSettings;
+
+        // Apply the globalization settings to the workbook
+        workbook.Settings.GlobalizationSettings = globalSettings;
 
         // Save the modified workbook
         workbook.Save("output.xlsx");
