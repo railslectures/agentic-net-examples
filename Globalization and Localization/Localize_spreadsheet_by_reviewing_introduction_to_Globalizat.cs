@@ -1,50 +1,55 @@
 using System;
+using System.Globalization;
 using Aspose.Cells;
 
-class GlobalizationDemo
+namespace AsposeCellsLocalizationDemo
 {
-    static void Main()
+    class Program
     {
-        // Load an existing XLSX workbook (create rule)
-        string inputPath = "input.xlsx";
-        Workbook workbook = new Workbook(inputPath);
+        static void Main()
+        {
+            // Load an existing XLSX workbook using LoadOptions (allows specifying culture if needed)
+            LoadOptions loadOptions = new LoadOptions(LoadFormat.Xlsx);
+            // Example: use German culture for loading (optional)
+            loadOptions.CultureInfo = new CultureInfo("de-DE");
+            Workbook workbook = new Workbook("input.xlsx", loadOptions);
 
-        // Create an instance of SettableGlobalizationSettings (create rule)
-        SettableGlobalizationSettings settings = new SettableGlobalizationSettings();
+            // Create an instance of SettableGlobalizationSettings to customize localization
+            SettableGlobalizationSettings locSettings = new SettableGlobalizationSettings();
 
-        // Customize the list separator (e.g., use semicolon instead of comma)
-        settings.SetListSeparator(';');
+            // Change the list separator from comma to semicolon
+            locSettings.SetListSeparator(';');
 
-        // Customize the display strings for boolean values
-        settings.SetBooleanValueString(true, "TRUE_LOCAL");
-        settings.SetBooleanValueString(false, "FALSE_LOCAL");
+            // Set custom display strings for boolean values
+            locSettings.SetBooleanValueString(true, "WAHR");   // German for TRUE
+            locSettings.SetBooleanValueString(false, "FALSCH"); // German for FALSE
 
-        // Map standard function names to localized names (bidirectional mapping)
-        settings.SetLocalFunctionName("SUM", "SOMME", true);        // Example: French for SUM
-        settings.SetLocalFunctionName("AVERAGE", "MOYENNE", true); // Example: French for AVERAGE
+            // Map standard function names to their German equivalents
+            locSettings.SetLocalFunctionName("SUM", "SUMME", true);
+            locSettings.SetLocalFunctionName("AVERAGE", "MITTELWERT", true);
 
-        // Apply the custom globalization settings to the workbook
-        workbook.Settings.GlobalizationSettings = settings;
+            // Map a built‑in name (e.g., "Total") to a German term
+            locSettings.SetLocalBuiltInName("Total", "Gesamt", true);
 
-        // Demonstrate the effect of the localized function names
-        Worksheet ws = workbook.Worksheets[0];
-        ws.Cells["B1"].PutValue(10);
-        ws.Cells["B2"].PutValue(20);
-        ws.Cells["B3"].PutValue(30);
+            // Apply the customized globalization settings to the workbook
+            workbook.Settings.GlobalizationSettings = locSettings;
 
-        // Use the localized function names in formulas
-        ws.Cells["A1"].Formula = "=SOMME(B1:B3)";   // Localized SUM
-        ws.Cells["A2"].Formula = "=MOYENNE(B1:B3)"; // Localized AVERAGE
+            // Demonstrate the effect by using the localized function name in a formula
+            Worksheet sheet = workbook.Worksheets[0];
+            sheet.Cells["B1"].PutValue(10);
+            sheet.Cells["B2"].PutValue(20);
+            sheet.Cells["B3"].PutValue(30);
+            // Use the German function name "SUMME"
+            sheet.Cells["A1"].Formula = "=SUMME(B1:B3)";
 
-        // Calculate the formulas (create rule)
-        workbook.CalculateFormula();
+            // Calculate formulas so the result is stored in the cell
+            workbook.CalculateFormula();
 
-        // Output the calculated results
-        Console.WriteLine($"Result of SOMME: {ws.Cells["A1"].Value}");
-        Console.WriteLine($"Result of MOYENNE: {ws.Cells["A2"].Value}");
+            // Output the calculated result to the console
+            Console.WriteLine($"Result of localized SUMME formula: {sheet.Cells["A1"].Value}");
 
-        // Save the modified workbook (save rule)
-        string outputPath = "output.xlsx";
-        workbook.Save(outputPath);
+            // Save the localized workbook
+            workbook.Save("localized_output.xlsx");
+        }
     }
 }
