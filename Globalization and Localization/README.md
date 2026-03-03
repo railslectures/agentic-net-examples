@@ -20,3 +20,4 @@
 - **Localize spreadsheet by running sample code for Cell.FormulaLocal implementation using a workbook loaded in XLSX format.** → `Localize_spreadsheet_by_running_sample_code_for_Cell.Formula.cs`
 - **Localize spreadsheet by reviewing console output of Cell.FormulaLocal implementation using a workbook loaded in XLSX format.** → `Localize_spreadsheet_by_reviewing_console_output_of_Cell.For.cs`
 - **Localize spreadsheet by implementing error and Boolean value localization for Russian or other languages using a workbook loaded in XLSX format.** → `Localize_spreadsheet_by_implementing_error_and_Boolean_value.cs`
+- **Localize spreadsheet by exploring possible usage scenarios for error and Boolean value localization using a workbook loaded in XLSX format.** → `Localize_spreadsheet_by_exploring_possible_usage_scenarios_f.cs`

@@ -1,109 +1,90 @@
 using System;
-using System.Globalization;
 using Aspose.Cells;
 
-namespace FormulaLocalLocalizationDemo
+namespace AsposeCellsLocalizationDemo
 {
+    // Custom globalization settings to localize boolean and error values
+    public class CustomGlobalizationSettings : GlobalizationSettings
+    {
+        // Localize boolean values (e.g., Russian)
+        public override string GetBooleanValueString(bool bv)
+        {
+            return bv ? "ИСТИНА" : "ЛОЖЬ";
+        }
+
+        // Localize common Excel error strings (e.g., Russian equivalents)
+        public override string GetErrorValueString(string err)
+        {
+            switch (err)
+            {
+                case "#NAME?": return "#ИМЯ?";
+                case "#DIV/0!": return "#ДЕЛ/0!";
+                case "#REF!": return "#ССЫЛКА!";
+                case "#VALUE!": return "#ЗНАЧ!";
+                case "#N/A": return "#Н/Д";
+                case "#NUM!": return "#ЧИСЛО!";
+                case "#NULL!": return "#ПУСТО!";
+                default: return base.GetErrorValueString(err);
+            }
+        }
+    }
+
     class Program
     {
         static void Main()
         {
-            // Load an existing workbook (XLSX format)
-            Workbook workbook = new Workbook("input.xlsx");
-            Worksheet sheet = workbook.Worksheets[0];
-            Cells cells = sheet.Cells;
+            // -----------------------------------------------------------------
+            // Step 1: Create a workbook and populate it with boolean values and
+            //         error strings. This workbook will be saved and later loaded.
+            // -----------------------------------------------------------------
+            Workbook wbCreate = new Workbook();
+            Cells cellsCreate = wbCreate.Worksheets[0].Cells;
 
-            // ------------------------------------------------------------
-            // Scenario 1: Display standard and localized formulas
-            // ------------------------------------------------------------
-            // Set workbook region to German to see German localization
-            workbook.Settings.Region = CountryCode.Germany;
+            // Boolean values
+            cellsCreate[0, 0].PutValue(true);   // A1
+            cellsCreate[0, 1].PutValue(false);  // B1
 
-            // Put a sample formula in English (standard format)
-            Cell cellA1 = cells["A1"];
-            cellA1.Formula = "=SUM(B1:C1)";
-
-            Console.WriteLine("Scenario 1:");
-            Console.WriteLine($"Standard Formula (Formula): {cellA1.Formula}");
-            Console.WriteLine($"Localized Formula (FormulaLocal): {cellA1.FormulaLocal}");
-            Console.WriteLine();
-
-            // ------------------------------------------------------------
-            // Scenario 2: Set formula using localized (German) syntax
-            // ------------------------------------------------------------
-            // Assign a German formula directly via FormulaLocal
-            cellA1.FormulaLocal = "=SUMME(B1:C1)";
-
-            Console.WriteLine("Scenario 2:");
-            Console.WriteLine($"After setting FormulaLocal:");
-            Console.WriteLine($"Standard Formula (Formula): {cellA1.Formula}");
-            Console.WriteLine($"Localized Formula (FormulaLocal): {cellA1.FormulaLocal}");
-            Console.WriteLine();
-
-            // ------------------------------------------------------------
-            // Scenario 3: Retrieve formulas with GetFormula (localized flag)
-            // ------------------------------------------------------------
-            Console.WriteLine("Scenario 3:");
-            Console.WriteLine($"GetFormula (standard): {cellA1.GetFormula(false, false)}");
-            Console.WriteLine($"GetFormula (localized): {cellA1.GetFormula(false, true)}");
-            Console.WriteLine();
-
-            // ------------------------------------------------------------
-            // Scenario 4: Use custom globalization settings to map a function
-            // ------------------------------------------------------------
-            // Create custom settings that map English "AVERAGE" to French "MOYENNE"
-            SettableGlobalizationSettings customSettings = new SettableGlobalizationSettings();
-            customSettings.SetLocalFunctionName("AVERAGE", "MOYENNE", true);
-            workbook.Settings.GlobalizationSettings = customSettings;
-            // Set culture to French so that localized function names are recognized
-            workbook.Settings.CultureInfo = new CultureInfo("fr-FR");
-
-            // Put sample data
-            cells["B2"].PutValue(10);
-            cells["B3"].PutValue(20);
-            cells["B4"].PutValue(30);
-
-            // Use the localized function name in a formula
-            Cell cellB1 = cells["B1"];
-            cellB1.Formula = "=MOYENNE(B2:B4)";
-
-            // Calculate to verify that the mapping works
-            workbook.CalculateFormula();
-
-            Console.WriteLine("Scenario 4:");
-            Console.WriteLine($"Formula using localized function: {cellB1.Formula}");
-            Console.WriteLine($"Result (should be 20): {cellB1.Value}");
-            Console.WriteLine();
-
-            // ------------------------------------------------------------
-            // Scenario 5: Parse a locale‑dependent formula using FormulaParseOptions
-            // ------------------------------------------------------------
-            FormulaParseOptions parseOptions = new FormulaParseOptions
+            // Error strings (standard English)
+            string[] errors = new string[]
             {
-                LocaleDependent = false,
-                R1C1Style = false
+                "#NAME?", "#DIV/0!", "#REF!", "#VALUE!", "#N/A", "#NUM!", "#NULL!"
             };
+            for (int i = 0; i < errors.Length; i++)
+            {
+                cellsCreate[0, i + 2].PutValue(errors[i]); // C1 onward
+            }
 
-            Cell cellC1 = cells["C1"];
-            // Set formula without leading '=' when using FormulaParseOptions
-            cellC1.SetFormula("TEXT(TODAY(),\"dd/mm/yyyy\")", parseOptions);
+            // Save the initial workbook (XLSX format)
+            string originalPath = "original.xlsx";
+            wbCreate.Save(originalPath);
 
-            Console.WriteLine("Scenario 5:");
-            Console.WriteLine($"Locale‑dependent formula set in C1: {cellC1.Formula}");
-            Console.WriteLine();
+            // -----------------------------------------------------------------
+            // Step 2: Load the workbook from the saved XLSX file.
+            // -----------------------------------------------------------------
+            Workbook wb = new Workbook(originalPath);
+            Cells cells = wb.Worksheets[0].Cells;
 
-            // ------------------------------------------------------------
-            // Scenario 6: Retrieve the localized name of a standard function via settings
-            // ------------------------------------------------------------
-            string localizedSumName = customSettings.GetLocalFunctionName("SUM");
-            Console.WriteLine("Scenario 6:");
-            Console.WriteLine($"Localized name for 'SUM' in current settings: {localizedSumName}");
-            Console.WriteLine();
+            // -----------------------------------------------------------------
+            // Step 3: Apply custom globalization settings for localization.
+            // -----------------------------------------------------------------
+            wb.Settings.GlobalizationSettings = new CustomGlobalizationSettings();
 
-            // ------------------------------------------------------------
-            // Save the workbook with all changes
-            // ------------------------------------------------------------
-            workbook.Save("output.xlsx");
+            // -----------------------------------------------------------------
+            // Step 4: Display localized values using StringValue.
+            //         Boolean values and error strings will appear in the
+            //         localized form defined in CustomGlobalizationSettings.
+            // -----------------------------------------------------------------
+            Console.WriteLine("Localized cell values:");
+            for (int col = 0; col < 9; col++)
+            {
+                Console.WriteLine($"Cell[0,{col}] ({cells[0, col].Name}): {cells[0, col].StringValue}");
+            }
+
+            // -----------------------------------------------------------------
+            // Step 5: Save the workbook with applied localization.
+            // -----------------------------------------------------------------
+            string localizedPath = "localized.xlsx";
+            wb.Save(localizedPath);
         }
     }
 }
