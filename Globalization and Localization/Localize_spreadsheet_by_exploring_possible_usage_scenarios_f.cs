@@ -1,50 +1,74 @@
 using System;
 using Aspose.Cells;
 
-class FormulaLocalDemo
+namespace AsposeCellsLocalizationDemo
 {
-    static void Main()
+    // Custom globalization settings to localize Boolean and error values.
+    public class CustomGlobalizationSettings : GlobalizationSettings
     {
-        // Load an existing workbook (replace with your actual file path)
-        Workbook workbook = new Workbook("Input.xlsx");
-        Worksheet worksheet = workbook.Worksheets[0];
+        // Localize Boolean values (e.g., Russian).
+        public override string GetBooleanValueString(bool bv)
+        {
+            return bv ? "ИСТИНА" : "ЛОЖЬ";
+        }
 
-        // Set the workbook region to German to demonstrate localization
-        workbook.Settings.Region = CountryCode.Germany;
+        // Localize common Excel error strings.
+        public override string GetErrorValueString(string err)
+        {
+            switch (err)
+            {
+                case "#NAME?": return "#ИМЯ?";
+                case "#DIV/0!": return "#ДЕЛ/0!";
+                case "#REF!": return "#ССЫЛКА!";
+                case "#VALUE!": return "#ЗНАЧ!";
+                case "#N/A": return "#Н/Д";
+                case "#NUM!": return "#ЧИСЛО!";
+                case "#NULL!": return "#ПУСТО!";
+                default: return base.GetErrorValueString(err);
+            }
+        }
+    }
 
-        // Scenario 1: Write a formula in standard (English) format
-        Cell cellA1 = worksheet.Cells["A1"];
-        cellA1.Formula = "=SUM(B1:C1)"; // English function name
-        Console.WriteLine("Standard Formula (A1): " + cellA1.Formula);
-        Console.WriteLine("Localized Formula (A1): " + cellA1.FormulaLocal);
+    class Program
+    {
+        static void Main()
+        {
+            // Load an existing XLSX workbook.
+            // Replace "input.xlsx" with the path to your source file.
+            Workbook wb = new Workbook("input.xlsx");
 
-        // Scenario 2: Write a formula using the localized (German) name
-        Cell cellA2 = worksheet.Cells["A2"];
-        cellA2.FormulaLocal = "=SUMME(B1:C1)"; // German function name for SUM
-        Console.WriteLine("\nAfter setting FormulaLocal (A2):");
-        Console.WriteLine("Standard Formula (A2): " + cellA2.Formula);
-        Console.WriteLine("Localized Formula (A2): " + cellA2.FormulaLocal);
+            // Apply the custom globalization settings to the workbook.
+            wb.Settings.GlobalizationSettings = new CustomGlobalizationSettings();
 
-        // Scenario 3: Use custom globalization settings to map a new localized function name
-        SettableGlobalizationSettings customSettings = new SettableGlobalizationSettings();
-        customSettings.SetLocalFunctionName("AVERAGE", "MITTELWERT", true);
-        workbook.Settings.GlobalizationSettings = customSettings;
+            // Access the first worksheet.
+            Worksheet sheet = wb.Worksheets[0];
+            Cells cells = sheet.Cells;
 
-        // Populate sample data for the AVERAGE calculation
-        worksheet.Cells["B1"].PutValue(10);
-        worksheet.Cells["B2"].PutValue(20);
-        worksheet.Cells["B3"].PutValue(30);
+            // Populate sample data if the workbook is empty.
+            // Boolean values.
+            cells[0, 0].PutValue(true);
+            cells[0, 1].PutValue(false);
 
-        Cell cellA3 = worksheet.Cells["A3"];
-        cellA3.FormulaLocal = "=MITTELWERT(B1:B3)"; // Use the localized name
-        workbook.CalculateFormula(); // Evaluate the formula
-        Console.WriteLine("\nResult of localized AVERAGE (A3): " + cellA3.Value);
+            // Common error strings.
+            string[] errors = new string[]
+            {
+                "#NAME?", "#DIV/0!", "#REF!", "#VALUE!", "#N/A", "#NUM!", "#NULL!"
+            };
+            for (int i = 0; i < errors.Length; i++)
+            {
+                cells[0, i + 2].PutValue(errors[i]);
+            }
 
-        // Scenario 4: Set a locale‑dependent formula (French date format)
-        worksheet.Cells["A4"].Formula = "TEXT(TODAY(),\"[$-fr-FR]dddd, dd mmmm yyyy\")";
-        Console.WriteLine("\nLocale‑dependent formula set in A4: " + worksheet.Cells["A4"].Formula);
+            // Display localized string values in the console.
+            Console.WriteLine("Localized cell values:");
+            for (int col = 0; col < 9; col++)
+            {
+                Console.WriteLine($"Cell[0,{col}]: {cells[0, col].StringValue}");
+            }
 
-        // Save the workbook with all changes
-        workbook.Save("Output.xlsx");
+            // Save the localized workbook.
+            // The output file will contain the localized Boolean and error strings.
+            wb.Save("localized_output.xlsx");
+        }
     }
 }
