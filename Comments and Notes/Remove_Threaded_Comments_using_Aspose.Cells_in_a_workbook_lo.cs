@@ -8,17 +8,21 @@ namespace AsposeCellsThreadedCommentRemoval
         static void Main()
         {
             // Load the existing XLSX workbook
-            Workbook workbook = new Workbook("input.xlsx");
+            string inputPath = "InputWorkbook.xlsx";
+            Workbook workbook = new Workbook(inputPath);
 
             // Iterate through all worksheets and clear all comments (including threaded comments)
             foreach (Worksheet sheet in workbook.Worksheets)
             {
-                // Clears both regular and threaded comments from the worksheet
+                // Clears all comments in the current worksheet
                 sheet.ClearComments();
             }
 
-            // Save the workbook after removing the threaded comments
-            workbook.Save("output.xlsx", SaveFormat.Xlsx);
+            // Save the workbook after removing threaded comments
+            string outputPath = "OutputWorkbook_NoThreadedComments.xlsx";
+            workbook.Save(outputPath, SaveFormat.Xlsx);
+
+            Console.WriteLine("Threaded comments have been removed and workbook saved to: " + outputPath);
         }
     }
 }
