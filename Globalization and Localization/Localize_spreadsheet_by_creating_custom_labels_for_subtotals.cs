@@ -1,41 +1,35 @@
 using System;
 using Aspose.Cells;
 
-namespace AsposeCellsGlobalizationDemo
+class Program
 {
-    // Custom globalization settings to provide custom subtotal labels
-    public class CustomGlobalizationSettings : GlobalizationSettings
+    static void Main()
     {
-        // Override GetTotalName to return a custom label for the Sum function
-        public override string GetTotalName(ConsolidationFunction functionType)
-        {
-            if (functionType == ConsolidationFunction.Sum)
-                return "Custom Subtotal";
-            // For other functions fall back to the default implementation
-            return base.GetTotalName(functionType);
-        }
-    }
+        // Load the existing XLSX workbook
+        Workbook workbook = new Workbook("input.xlsx");
+        Worksheet worksheet = workbook.Worksheets[0];
+        Cells cells = worksheet.Cells;
 
-    class Program
-    {
-        static void Main()
-        {
-            // Load an existing XLSX workbook
-            Workbook workbook = new Workbook("input.xlsx");
+        // Create a SettableGlobalizationSettings instance to customize labels
+        SettableGlobalizationSettings globalization = new SettableGlobalizationSettings();
 
-            // Apply the custom globalization settings to the workbook
-            workbook.Settings.GlobalizationSettings = new CustomGlobalizationSettings();
+        // Set a custom label for the Sum subtotal (used by Subtotal operation)
+        globalization.SetTotalName(ConsolidationFunction.Sum, "My Subtotal");
 
-            // Define the range on which to calculate subtotals (e.g., A1:B5)
-            // Adjust the range as needed for your data
-            CellArea area = CellArea.CreateCellArea(0, 0, 4, 1); // rows 0-4, columns 0-1
+        // Apply the custom globalization settings to the workbook
+        workbook.Settings.GlobalizationSettings = globalization;
 
-            // Perform subtotal: group by column 0 (first column), use Sum, and show subtotals
-            // Parameters: area, column index to group by, function, array of subtotal columns, replace, pageBreak, summaryBelow
-            workbook.Worksheets[0].Cells.Subtotal(area, 0, ConsolidationFunction.Sum, new int[] { 1 }, true, false, true);
+        // Define the range on which to apply the subtotal (e.g., A1:B5)
+        // Rows are zero‑based, so rows 0‑4 and columns 0‑1 cover A1:B5
+        CellArea area = CellArea.CreateCellArea(0, 0, 4, 1);
 
-            // Save the modified workbook
-            workbook.Save("output.xlsx");
-        }
+        // Apply subtotal:
+        // - group by column 0 (first column)
+        // - calculate Sum for column 1 (second column)
+        // - include subtotal rows, hide detail rows, and keep the original data
+        cells.Subtotal(area, 0, ConsolidationFunction.Sum, new int[] { 0 }, true, false, true);
+
+        // Save the modified workbook with the custom subtotal label
+        workbook.Save("output.xlsx");
     }
 }

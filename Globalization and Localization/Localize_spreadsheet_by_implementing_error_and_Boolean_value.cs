@@ -6,14 +6,13 @@ namespace AsposeCellsLocalizationDemo
     // Custom globalization settings for Russian language
     public class RussianGlobalizationSettings : GlobalizationSettings
     {
-        // Localize Boolean values
+        // Localize Boolean values: TRUE -> ИСТИНА, FALSE -> ЛОЖЬ
         public override string GetBooleanValueString(bool bv)
         {
-            // TRUE -> ИСТИНА, FALSE -> ЛОЖЬ
             return bv ? "ИСТИНА" : "ЛОЖЬ";
         }
 
-        // Localize error values
+        // Localize common Excel error values
         public override string GetErrorValueString(string err)
         {
             switch (err)
@@ -34,18 +33,17 @@ namespace AsposeCellsLocalizationDemo
     {
         static void Main()
         {
-            // Path to the source XLSX file
+            // Path to the source XLSX file (replace with actual path)
             string inputPath = "input.xlsx";
 
-            // Load the workbook (create lifecycle)
-            Workbook workbook = new Workbook(inputPath);
+            // Load the workbook (XLSX format)
+            Workbook wb = new Workbook(inputPath);
 
-            // Apply custom Russian globalization settings
-            workbook.Settings.GlobalizationSettings = new RussianGlobalizationSettings();
+            // Apply the custom Russian globalization settings
+            wb.Settings.GlobalizationSettings = new RussianGlobalizationSettings();
 
-            // Demonstrate localized values
-            // Put sample data: Boolean values and error strings
-            Cells cells = workbook.Worksheets[0].Cells;
+            // Demonstrate localization: write sample data to the first row
+            Cells cells = wb.Worksheets[0].Cells;
             cells[0, 0].PutValue(true);   // Boolean TRUE
             cells[0, 1].PutValue(false);  // Boolean FALSE
 
@@ -58,15 +56,17 @@ namespace AsposeCellsLocalizationDemo
                 cells[0, i + 2].PutValue(errors[i]);
             }
 
-            // Output localized strings to console
-            for (int col = 0; col < 9; col++)
+            // Display localized string values in the console
+            Console.WriteLine("Localized cell values in the first row:");
+            for (int col = 0; col < errors.Length + 2; col++)
             {
                 Console.WriteLine($"Cell[0,{col}]: {cells[0, col].StringValue}");
             }
 
-            // Save the localized workbook (save lifecycle)
+            // Save the localized workbook
             string outputPath = "output.xlsx";
-            workbook.Save(outputPath);
+            wb.Save(outputPath);
+            Console.WriteLine($"Workbook saved to '{outputPath}'.");
         }
     }
 }

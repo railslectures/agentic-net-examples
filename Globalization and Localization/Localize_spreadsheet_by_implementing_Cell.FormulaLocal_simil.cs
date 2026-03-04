@@ -1,41 +1,53 @@
 using System;
 using Aspose.Cells;
 
-class Program
+namespace AsposeCellsFormulaLocalDemo
 {
-    static void Main()
+    class Program
     {
-        // Load an existing XLSX workbook (replace with your actual file path)
-        Workbook workbook = new Workbook("input.xlsx");
+        static void Main(string[] args)
+        {
+            // Path to the source XLSX file (must exist)
+            string inputPath = "input.xlsx";
 
-        // Set the workbook's locale to German to demonstrate localization
-        workbook.Settings.Region = CountryCode.Germany;
+            // Load the workbook from the file
+            Workbook workbook = new Workbook(inputPath);
 
-        // Access the first worksheet and a target cell (A1)
-        Worksheet worksheet = workbook.Worksheets[0];
-        Cell cell = worksheet.Cells["A1"];
+            // Set the workbook locale (example: German)
+            workbook.Settings.Region = CountryCode.Germany;
 
-        // Set a formula using the standard (English) notation
-        cell.Formula = "=SUM(B1:C1)";
+            // Get the first worksheet
+            Worksheet sheet = workbook.Worksheets[0];
 
-        // Display the formula in both standard and localized forms
-        Console.WriteLine("Standard Formula: " + cell.Formula);
-        Console.WriteLine("Localized Formula: " + cell.FormulaLocal);
+            // Access a specific cell (A1)
+            Cell cell = sheet.Cells["A1"];
 
-        // Now set the formula using the German localized function name
-        cell.FormulaLocal = "=SUMME(B1:C1)";
+            // If the cell already contains a formula, display both the standard
+            // (English) and the localized (German) versions
+            Console.WriteLine("Original formulas:");
+            Console.WriteLine("Standard (Formula)   : " + cell.Formula);
+            Console.WriteLine("Localized (FormulaLocal) : " + cell.FormulaLocal);
 
-        // Show the updated formulas after assigning the localized version
-        Console.WriteLine("\nAfter setting FormulaLocal:");
-        Console.WriteLine("Standard Formula: " + cell.Formula);
-        Console.WriteLine("Localized Formula: " + cell.FormulaLocal);
+            // Set a formula using the localized syntax (German function name)
+            // Example: SUMME is the German equivalent of SUM
+            cell.FormulaLocal = "=SUMME(B1:C1)";
 
-        // Optionally, retrieve formulas with explicit flags
-        Console.WriteLine("\nUsing GetFormula:");
-        Console.WriteLine("English formula: " + cell.GetFormula(false, false));
-        Console.WriteLine("Localized formula: " + cell.GetFormula(false, true));
+            // After setting, the standard Formula property is automatically updated
+            Console.WriteLine("\nAfter assigning FormulaLocal:");
+            Console.WriteLine("Standard (Formula)   : " + cell.Formula);
+            Console.WriteLine("Localized (FormulaLocal) : " + cell.FormulaLocal);
 
-        // Save the modified workbook
-        workbook.Save("output.xlsx");
+            // Recalculate the workbook so the formula result is refreshed
+            workbook.CalculateFormula();
+
+            // Show the calculated value
+            Console.WriteLine("\nCalculated value in A1: " + cell.Value);
+
+            // Save the modified workbook to a new file
+            string outputPath = "output.xlsx";
+            workbook.Save(outputPath);
+
+            Console.WriteLine($"\nWorkbook saved to '{outputPath}'.");
+        }
     }
 }
