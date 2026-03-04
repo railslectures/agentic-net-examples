@@ -1,14 +1,15 @@
 using System;
 using Aspose.Cells;
 
-class RemoveThreadedComments
+class RemoveThreadedCommentsDemo
 {
     static void Main()
     {
         // Load the existing XLSX workbook
         Workbook workbook = new Workbook("input.xlsx");
 
-        // Remove all comments (including threaded comments) from each worksheet
+        // Iterate through all worksheets and clear their comments
+        // Worksheet.ClearComments removes both regular and threaded comments
         foreach (Worksheet sheet in workbook.Worksheets)
         {
             sheet.ClearComments();
