@@ -2,58 +2,70 @@ using System;
 using System.Globalization;
 using Aspose.Cells;
 
-namespace AsposeCellsLocalizationDemo
+class Program
 {
-    class Program
+    static void Main()
     {
-        static void Main()
+        // Load an existing XLSX workbook with German culture settings.
+        // LoadOptions.CultureInfo influences how numbers, dates, etc., are parsed.
+        LoadOptions loadOptions = new LoadOptions(LoadFormat.Xlsx);
+        loadOptions.CultureInfo = new CultureInfo("de-DE");
+        Workbook workbook = new Workbook("input.xlsx", loadOptions);
+
+        // Apply custom globalization settings to the workbook.
+        // This overrides how boolean values, error messages, and function names are displayed.
+        workbook.Settings.GlobalizationSettings = new CustomGlobalizationSettings();
+
+        // Demonstrate the effect of the custom settings.
+        // Assume A1 and A2 contain boolean values, A3 contains an error value.
+        Cells cells = workbook.Worksheets[0].Cells;
+        Console.WriteLine($"A1 (boolean): {cells["A1"].StringValue}");
+        Console.WriteLine($"A2 (boolean): {cells["A2"].StringValue}");
+        Console.WriteLine($"A3 (error)   : {cells["A3"].StringValue}");
+
+        // Use a localized function name in a formula to verify mapping.
+        cells["B1"].PutValue(10);
+        cells["B2"].PutValue(20);
+        cells["B3"].PutValue(30);
+        cells["C1"].Formula = "=SUMME(B1:B3)"; // "SUMME" is the German localized name for SUM.
+        workbook.CalculateFormula();
+        Console.WriteLine($"C1 (SUMME result): {cells["C1"].Value}");
+
+        // Save the workbook with the applied globalization settings.
+        workbook.Save("output.xlsx");
+    }
+
+    // Custom globalization settings that localize booleans, errors, and function names.
+    class CustomGlobalizationSettings : GlobalizationSettings
+    {
+        // Localize boolean display strings.
+        public override string GetBooleanValueString(bool value)
         {
-            // Load an existing XLSX workbook with a specific culture (e.g., German)
-            LoadOptions loadOptions = new LoadOptions(LoadFormat.Xlsx);
-            loadOptions.CultureInfo = new CultureInfo("de-DE"); // German uses comma as decimal separator
-            Workbook workbook = new Workbook("input.xlsx", loadOptions);
+            return value ? "WAHR" : "FALSCH"; // German for TRUE/FALSE
+        }
 
-            // Create an instance of SettableGlobalizationSettings to customize localization
-            SettableGlobalizationSettings locSettings = new SettableGlobalizationSettings();
+        // Localize common Excel error messages.
+        public override string GetErrorValueString(string error)
+        {
+            switch (error)
+            {
+                case "#DIV/0!": return "#DIV/0!";
+                case "#NAME?":  return "#NAME?";
+                case "#REF!":   return "#BEZUG!";
+                case "#VALUE!": return "#WERT!";
+                case "#N/A":    return "#NV";
+                case "#NUM!":   return "#ZAHL!";
+                case "#NULL!":  return "#NULL!";
+                default:        return base.GetErrorValueString(error);
+            }
+        }
 
-            // Example: change the list separator from comma to semicolon
-            locSettings.SetListSeparator(';');
-
-            // Example: customize boolean display strings
-            locSettings.SetBooleanValueString(true, "WAHR");   // German for TRUE
-            locSettings.SetBooleanValueString(false, "FALSCH"); // German for FALSE
-
-            // Example: map standard function names to localized names
-            locSettings.SetLocalFunctionName("SUM", "SUMME", true);          // SUM -> SUMME
-            locSettings.SetLocalFunctionName("AVERAGE", "MITTELWERT", true); // AVERAGE -> MITTELWERT
-
-            // Example: map a built‑in name (e.g., "Total") to a localized version
-            locSettings.SetLocalBuiltInName("Total", "Gesamt", true);
-
-            // Apply the localization settings to the workbook
-            workbook.Settings.GlobalizationSettings = locSettings;
-
-            // Demonstrate usage of the localized function name in a formula
-            Worksheet sheet = workbook.Worksheets[0];
-            sheet.Cells["B1"].PutValue(10);
-            sheet.Cells["B2"].PutValue(20);
-            sheet.Cells["B3"].PutValue(30);
-
-            // Use the localized function name "SUMME" (German for SUM)
-            sheet.Cells["A1"].Formula = "=SUMME(B1:B3)";
-
-            // Calculate formulas so that the result is stored in the cell
-            workbook.CalculateFormula();
-
-            // Output the calculated result to the console
-            Console.WriteLine($"Result of localized SUMME formula: {sheet.Cells["A1"].Value}");
-
-            // Retrieve and display the localized name for the built‑in "Total"
-            string localizedTotal = locSettings.GetLocalBuiltInName("Total");
-            Console.WriteLine($"Localized built‑in name for 'Total': {localizedTotal}");
-
-            // Save the modified workbook
-            workbook.Save("output.xlsx");
+        // Map the standard function name "SUM" to its German equivalent "SUMME".
+        public override string GetLocalFunctionName(string standardName)
+        {
+            if (standardName.Equals("SUM", StringComparison.OrdinalIgnoreCase))
+                return "SUMME";
+            return base.GetLocalFunctionName(standardName);
         }
     }
 }
