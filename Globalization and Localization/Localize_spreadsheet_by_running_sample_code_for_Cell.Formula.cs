@@ -5,37 +5,35 @@ namespace AsposeCellsFormulaLocalDemo
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            // Path to the source XLSX file (replace with actual path)
-            string inputPath = "sample.xlsx";
-
-            // Load the workbook (XLSX format)
+            // Load an existing XLSX workbook (replace with your actual file path)
+            string inputPath = "input.xlsx";
             Workbook workbook = new Workbook(inputPath);
 
-            // Set the workbook's default locale to German (for demonstration)
+            // Set the workbook's default locale to German (de-DE) for demonstration
             workbook.Settings.Region = CountryCode.Germany;
 
             // Access the first worksheet and cell A1
             Worksheet worksheet = workbook.Worksheets[0];
             Cell cell = worksheet.Cells["A1"];
 
-            // Set a formula using the standard (English) notation
-            cell.Formula = "=SUM(B1:C1)";
-
-            // Display the formula in both standard and localized forms
+            // Display the formula in standard (English) format
             Console.WriteLine("Standard Formula: " + cell.Formula);
-            Console.WriteLine("Localized Formula: " + cell.FormulaLocal);
 
-            // Set the formula using the German localized notation
+            // Display the formula in the localized (German) format
+            Console.WriteLine("Localized Formula (FormulaLocal): " + cell.FormulaLocal);
+
+            // Set a formula using the German localized syntax
+            // In German Excel the SUM function is "SUMME"
             cell.FormulaLocal = "=SUMME(B1:C1)";
 
-            // Display the formulas again to show the change
+            // Show the updated formulas
             Console.WriteLine("\nAfter setting FormulaLocal:");
             Console.WriteLine("Standard Formula: " + cell.Formula);
-            Console.WriteLine("Localized Formula: " + cell.FormulaLocal);
+            Console.WriteLine("Localized Formula (FormulaLocal): " + cell.FormulaLocal);
 
-            // Demonstrate GetFormula with localization flags
+            // Optionally, demonstrate GetFormula with localization flags
             Console.WriteLine("\nUsing GetFormula:");
             Console.WriteLine("English formula: " + cell.GetFormula(false, false));
             Console.WriteLine("Localized formula: " + cell.GetFormula(false, true));
