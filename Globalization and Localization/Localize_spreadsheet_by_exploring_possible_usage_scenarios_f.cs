@@ -1,79 +1,79 @@
 using System;
 using Aspose.Cells;
-using Aspose.Cells.Pivot;
-using Aspose.Cells.Settings;
+using Aspose.Cells.Charts;
 
-namespace AsposeCellsLocalizationDemo
+namespace AsposeCellsGlobalizationDemo
 {
     class Program
     {
         static void Main()
         {
-            // Load an existing workbook (replace with your actual file path)
+            // Load an existing workbook (replace with actual path)
             Workbook workbook = new Workbook("input.xlsx");
             Worksheet sheet = workbook.Worksheets[0];
             Cells cells = sheet.Cells;
 
-            // ------------------------------------------------------------
-            // 1. Create a SettableGlobalizationSettings instance to customize
-            //    total and grand total labels for standard subtotals.
-            // ------------------------------------------------------------
-            SettableGlobalizationSettings globalization = new SettableGlobalizationSettings();
+            // -------------------------------------------------
+            // 1. Prepare sample data for subtotal and pie chart
+            // -------------------------------------------------
+            // Header
+            cells["A1"].PutValue("Category");
+            cells["B1"].PutValue("Amount");
 
-            // Customize the total name for the SUM function (used by Cells.Subtotal)
-            globalization.SetTotalName(ConsolidationFunction.Sum, "Custom Sum Total");
+            // Data rows
+            string[] categories = { "Apple", "Banana", "Cherry", "Date", "Elderberry" };
+            double[] amounts = { 1200, 850, 430, 670, 290 };
 
-            // Customize the grand total name for the SUM function (used by PivotTables)
-            globalization.SetGrandTotalName(ConsolidationFunction.Sum, "Custom Grand Sum");
-
-            // Apply the globalization settings to the workbook
-            workbook.Settings.GlobalizationSettings = globalization;
-
-            // ------------------------------------------------------------
-            // 2. Apply a regular subtotal on a data range.
-            //    The total row will display the custom total name set above.
-            // ------------------------------------------------------------
-            // Assume data is in A1:B6 (headers + 5 rows of data)
-            CellArea dataArea = CellArea.CreateCellArea(0, 0, 5, 1);
-            // Subtotal on column 0 (Region) using SUM on column 1 (Sales)
-            cells.Subtotal(dataArea, 0, ConsolidationFunction.Sum, new int[] { 1 }, true, false, true);
-
-            // ------------------------------------------------------------
-            // 3. Create a PivotTable to demonstrate the custom grand total label.
-            // ------------------------------------------------------------
-            // Add sample data if the loaded workbook does not contain any.
-            // (This block can be removed if the source file already has data.)
-            if (cells["A1"].Value == null)
+            for (int i = 0; i < categories.Length; i++)
             {
-                cells["A1"].PutValue("Category");
-                cells["B1"].PutValue("Amount");
-                cells["A2"].PutValue("A");
-                cells["B2"].PutValue(100);
-                cells["A3"].PutValue("B");
-                cells["B3"].PutValue(200);
-                cells["A4"].PutValue("A");
-                cells["B4"].PutValue(150);
-                cells["A5"].PutValue("B");
-                cells["B5"].PutValue(250);
+                cells[i + 1, 0].PutValue(categories[i]);   // Column A
+                cells[i + 1, 1].PutValue(amounts[i]);     // Column B
             }
 
-            // Define the source range for the pivot table
-            int pivotIndex = sheet.PivotTables.Add("A1:B5", "D1", "PivotTable1");
-            PivotTable pivot = sheet.PivotTables[pivotIndex];
+            // -------------------------------------------------
+            // 2. Apply custom globalization settings
+            // -------------------------------------------------
+            // Create a SettableGlobalizationSettings instance to customize subtotal label
+            SettableGlobalizationSettings globalization = new SettableGlobalizationSettings();
+            // Change the total name for SUM function (used by Subtotal)
+            globalization.SetTotalName(ConsolidationFunction.Sum, "Custom Sum");
 
-            // Configure pivot fields
-            pivot.AddFieldToArea(PivotFieldType.Row, 0);   // Category as row field
-            int dataFieldIdx = pivot.AddFieldToArea(PivotFieldType.Data, 1); // Amount as data field
-            PivotField dataField = pivot.DataFields[dataFieldIdx];
-            dataField.Function = ConsolidationFunction.Sum; // Use SUM aggregation
+            // Create a SettableChartGlobalizationSettings instance to customize chart "Other" label
+            SettableChartGlobalizationSettings chartGlobalization = new SettableChartGlobalizationSettings();
+            chartGlobalization.SetOtherName("Other_Custom");
 
-            // Refresh and calculate to apply the custom grand total label
-            pivot.RefreshData();
-            pivot.CalculateData();
+            // Assign the chart globalization to the main settings
+            globalization.ChartSettings = chartGlobalization;
 
-            // ------------------------------------------------------------
-            // 4. Save the modified workbook.
-            // ------------------------------------------------------------
+            // Apply the settings to the workbook
+            workbook.Settings.GlobalizationSettings = globalization;
+
+            // -------------------------------------------------
+            // 3. Add a subtotal (using the customized total name)
+            // -------------------------------------------------
+            // Define the range that includes the data (A1:B6)
+            CellArea dataArea = CellArea.CreateCellArea(0, 0, categories.Length, 1);
+            // Apply subtotal: group by Category (column 0), sum the Amount (column 1)
+            // The last parameter 'true' indicates that the total row will be added
+            cells.Subtotal(dataArea, 0, ConsolidationFunction.Sum, new int[] { 1 }, true, false, true);
+
+            // -------------------------------------------------
+            // 4. Create a pie chart that will use the "Other" label
+            // -------------------------------------------------
+            // Add a new chart (pie) to the worksheet
+            int chartIndex = sheet.Charts.Add(ChartType.Pie, 10, 0, 25, 10);
+            Chart pieChart = sheet.Charts[chartIndex];
+
+            // Set chart data source: categories as X values, amounts as Y values
+            pieChart.NSeries.Add("B2:B6", true);
+            pieChart.NSeries.CategoryData = "A2:A6";
+
+            // Set a title for clarity
+            pieChart.Title.Text = "Sales Distribution";
+
+            // -------------------------------------------------
+            // 5. Save the modified workbook
+            // -------------------------------------------------
             workbook.Save("output.xlsx");
         }
     }
